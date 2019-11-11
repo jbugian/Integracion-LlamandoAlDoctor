@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	
+	</style>
+	<meta charset="UTF-8">
+	<title>Llamando al Doctor</title>
+  
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="estilo.css">
+	<script type="text/javascript">
+	//Acortar links
+	function makeShort(data) {
+		console.log("makeShort");
+		let linkRequest = {
+		destination: "https://lad-pwa.euda.com.ar/?token="+data.token, //$("#resultado_json"),
+		domain: { fullName: "rebrand.ly" }
+		//, slashtag: "A_NEW_SLASHTAG"
+		//, title: "Rebrandly YouTube channel"
+		}
+	
+		let requestHeaders = {
+		"Content-Type": "application/json",
+		"apikey": "36fa7d6345d74e8a9dca9dc9f9c6a40f",
+		}
+	
+		$.ajax({
+		url: "https://api.rebrandly.com/v1/links",
+		type: "post",
+		data: JSON.stringify(linkRequest),
+		headers: requestHeaders,
+		dataType: "json",
+		success: (link) => {
+			console.log('Long URL was ${link.destination}, short URL is ${link.shortUrl}');
+			$("#resultado_json_short").empty();
+			$("#resultado_json_short").append(link.shortUrl);
+			document.getElementById("link").value = link.shortUrl;
+		}
+		});
+
+    }
+		
+	// Borrar campos
+	function borrar_datos() {
+		document.getElementById("nombre").value = "";
+		document.getElementById("email").value = "";
+		document.getElementById("phone").value = "";
+		document.getElementById("nroDocumento").value = "";
+	}
+  
+    // Procesar resultados del webservice
+    /*function webServiceResult(data)
+    {
+      $("#resultado_json").empty();    
+
+      $("#resultado_json").append("https://app.llamandoaldoctor.com/?token="+data.token+"<br>");
+		
+    }*/
+	
+	function getFormattedDate(date) {
+		var year = date.substring(0,4);
+		var month = date.substring(5,7);
+		var day = date.substring(8,10);
+  
+		return day + '-' + month + '-' + year;
+	}
+      
+    // Llamada al webservice
+    function callWebService()
+    {
+	  var nombre = document.getElementById("nombre").value;
+	  var email = document.getElementById("email").value;
+	  var phone = document.getElementById("phone").value;
+	  var nroDocumento = document.getElementById("nroDocumento").value;
+	  var cliente = document.getElementById("Cliente").value;
+	  console.log("cliente:" + cliente);
+	  var dateOfBirth = document.getElementById("birthdDate").value;
+	  var dateOfBirthStr = getFormattedDate(dateOfBirth);
+	  var gender = document.getElementById("gender").value;
+	  var provider;
+	  var opcionGenero = null;
+	  switch (cliente) {
+			case "1":
+				provider = "5da5bb8fed6727001f713f58";
+				break;
+			case "2": 
+				provider = "5da5bc22ed6727001f713f59";
+				break;
+	  }
+	  
+	  	  switch (gender) {
+			case "1":
+				opcionGenero = "M";
+				break;
+			case "2": 
+				opcionGenero = "F"
+				break;
+	  }
+	  
+	  console.log("Proveedor: "+provider);
+	  console.log("Email: "+email);
+	  console.log("Nombre: "+nombre);
+	  console.log("Fecha: "+dateOfBirthStr);
+	  console.log("gender: "+opcionGenero);
+	  console.log("Phone: "+phone);
+	  console.log("Dcoum: "+nroDocumento);
+      try
+      { 
+        $.ajax({
+          url: "https://dev.api.llamandoaldoctor.com/patient/token",
+          data:
+          {
+            "provider": provider,
+			"email": email,
+			"name": nombre,
+			"birthdDate": dateOfBirthStr, //opcional
+			"gender": opcionGenero, //opcional
+			"phone": phone, //opcional
+			"documentNumber": nroDocumento,
+			"plan": "defaultPlan"
+          },
+          type: "post",
+          async: true,
+          dataType: "json",
+          success: function(msg) { makeShort(msg) },
+          error: function(jqXmlHttpRequest, textStatus, errorThrown) { alert("Error leyendo datos."); }
+        });
+      } 
+      catch (err) 
+      {
+        alert(err);
+      }
+    }
+	
+	function num(c){
+		c.value=/^\d+$/.test(c.value)?c.value:c.value.substr(0,c.value.length-1);
+	}
+
+  </script>  
+  
+</head>
+
+<body>
+	<form action="#" target="" method="get" name="formDatosPersonales">
+	<h1 style = "font: 150% sans-serif; font-weight:bold; text-align: center; color: #ff3322;">Llamando al Doctor</h1>
+	<br>
+	<label for="Cliente">Seleccionar Cliente</label>
+	<select name="Cliente" id = "Cliente" style="width:180px; padding:3px 10px; border:1px solid #f6f6f6; border-radius:3px; background-color:#f6f6f6;	margin:8px 0;">
+		<option value="1">Hipotecario Seguros</option> 
+		<option value="2">Directo</option> 
+	</select><br/>
+<br/>
+	<label for="nombre">Nombre</label>
+	<input type="text" name="nombre" id="nombre" placeholder="Escribe tu nombre"/>
+<br/>
+
+	<label for="email" />Email</label>
+	<input type="email" name="email" id="email" placeholder="email" required />
+
+<br/>
+	<label for="date" />Fecha de Nacimiento</label>
+	<input type="date" name="birthdDate" id = "birthdDate"><br/>
+<br/>
+	<label for="date" />Genero</label>
+	<select name="Genero" id = "gender" style="width:180px; padding:3px 10px; border:1px solid #f6f6f6; border-radius:3px; background-color:#f6f6f6;	margin:8px 0;">
+	<option value="1">Masculino</option> 
+	<option value="2">Femenino</option> 
+</select><br/>
+<br/>
+	<label for="telefono" />Telefono</label>
+	<input type="number" size="20" maxlength="30" placeholder = "Cod Area + Num sin 0 ni -" name="phone" id = "phone" onkeyup="num(this);" onblur='num(this);'><br/>
+<br/>
+	<label for="documento" />Documento</label>
+	<input type="number" size="10" maxlength="30" placeholder="Nro Documento" name="documentNumber" id = "nroDocumento" onkeyup="num(this);" onblur='num(this);'>
+
+	<input type="button" name="enviar" onclick="javascript:callWebService();" value="Obtener Token"/>
+	<input type="button" name="limpiarCampos" onclick="javascript:borrar_datos();" value="Limpiar Campos"/>
+	<br>
+	<label for="Link">Link</label>
+	<input type="text" name="link" id="link" readonly placeholder="Link" />
+	<input type="button" id="copyBlock" value = "Copiar enlace"> <span id="copyAnswer"></span>
+</div>
+
+	</form>
+</body>
+
+  <script>
+		//Botón Copiar
+    var textarea = document.getElementById("link");
+    var answer = document.getElementById("copyAnswer");
+    var copy   = document.getElementById("copyBlock");
+    copy.addEventListener('click', function(e) {
+       // Sleccionando el texto
+       textarea.select(); 
+       try {
+           // Copiando el texto seleccionado
+           var successful = document.execCommand('copy');
+     
+           if(successful) answer.innerHTML = 'Copiado!';
+			else answer.innerHTML = 'Incapaz de copiar!';
+			} catch (err) {
+				answer.innerHTML = 'Browser no soportado!';
+			}
+    });
+	</script>
+
+</html>
